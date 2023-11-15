@@ -42,17 +42,19 @@ struct ContentView: View {
 
     var body: some View {
         Navigation(navController: container.navController) { _, routeContainer in
-            switch routeContainer.route {
-            case .root:
-                AnyView(RootView())
-            case .route1(let autoPop):
-                AnyView(Route1View(autoPop: autoPop))
-            case .route2:
-                AnyView(Route2View())
-            case .route3:
-                AnyView(Route3View())
-            case .route4:
-                AnyView(Route4View())
+            Group {
+                switch routeContainer.route {
+                case .root:
+                    RootView()
+                case .route1(let autoPop):
+                    Route1View(autoPop: autoPop)
+                case .route2:
+                    Route2View()
+                case .route3:
+                    Route3View()
+                case .route4:
+                    Route4View()
+                }
             }
         }
         .environmentObject(container.navController)
