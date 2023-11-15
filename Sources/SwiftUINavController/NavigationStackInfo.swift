@@ -29,6 +29,16 @@ struct NavigationStackInfo: UIViewControllerRepresentable {
                             {
                                 // already patched
                             } else {
+                                // on iOS 17 didShow is not called for NavigationStack's root view inside a sheet
+                                if #available(iOS 17.0, *) {
+                                    if isInsideSheet(viewController) {
+                                        DispatchQueue.main.async {
+                                            willShow?()
+                                            didShow?()
+                                        }
+                                    }
+                                }
+
                                 let forward = UINavigationControllerDelegateProxyForward {
                                     willShow?()
                                 } didShow: {
@@ -54,6 +64,23 @@ struct NavigationStackInfo: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ viewController: UIViewController, context: Context) {}
+}
+
+private func isInsideSheet(_ viewController: UIViewController) -> Bool {
+    var current: UIViewController? = viewController
+
+    while current != nil {
+        // cast to Any to get the actual type instead of UIViewController
+        let currentAny: Any = current!
+
+        if String(describing: type(of: currentAny)).hasPrefix("PresentationHostingController<") {
+            return true
+        }
+
+        current = current!.parent
+    }
+
+    return false
 }
 
 extension View {

@@ -301,6 +301,327 @@ final class SwiftUINavControllerExampleUITests: XCTestCase {
             ])
     }
 
+    func testSheetPushPop() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        app.buttons["Sheet"].tap()
+        XCTAssertTrue(app.buttons["Dismiss"].waitForExistence(timeout: 5))
+
+        app.buttons["Push 1"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        assertHistory(app, ["/", "/route1(autoPop: false)", "/"])
+    }
+
+    func testSheetPushPopBeforeDidShow() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        app.buttons["Sheet"].tap()
+        XCTAssertTrue(app.buttons["Dismiss"].waitForExistence(timeout: 5))
+
+        app.buttons["Push 1 (auto pop)"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        assertHistory(app, ["/", "/route1(autoPop: true)", "/"])
+
+        // check that navigation still works after auto pop
+
+        app.buttons["Push 1"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        assertHistory(app, ["/", "/route1(autoPop: true)", "/", "/route1(autoPop: false)", "/"])
+    }
+
+    func testSheetPushPopPath() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        app.buttons["Sheet"].tap()
+        XCTAssertTrue(app.buttons["Dismiss"].waitForExistence(timeout: 5))
+
+        app.buttons["Push 1"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+
+        app.buttons["Back"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        assertHistory(app, ["/", "/route1(autoPop: false)", "/"])
+
+        // check that navigation still works after back button tap
+
+        app.buttons["Push 1"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        assertHistory(app, ["/", "/route1(autoPop: false)", "/", "/route1(autoPop: false)", "/"])
+    }
+
+    func testSheetReplacePathEmpty() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        app.buttons["Sheet"].tap()
+        XCTAssertTrue(app.buttons["Dismiss"].waitForExistence(timeout: 5))
+
+        app.buttons["Replace 3, 4"].tap()
+        XCTAssertTrue(app.staticTexts["Route 4"].waitForExistence(timeout: 5))
+
+        assertHistory(
+            app,
+            [
+                "/",
+                "/route3",
+                "/route3/route4",
+            ])
+
+        // check that navigation still works
+
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Route 3"].waitForExistence(timeout: 5))
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+        app.buttons["Push 1"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        assertHistory(
+            app,
+            [
+                "/",
+                "/route3",
+                "/route3/route4",
+                "/route3",
+                "/",
+                "/route1(autoPop: false)",
+                "/",
+            ])
+    }
+
+    func testSheetReplaceRoutesEmpty() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        app.buttons["Sheet"].tap()
+        XCTAssertTrue(app.buttons["Dismiss"].waitForExistence(timeout: 5))
+
+        app.buttons["Push 1"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+
+        app.buttons["Push 2"].tap()
+        XCTAssertTrue(app.staticTexts["Route 2"].waitForExistence(timeout: 5))
+
+        app.buttons["Replace 3, 4"].tap()
+        XCTAssertTrue(app.staticTexts["Route 4"].waitForExistence(timeout: 5))
+
+        assertHistory(
+            app,
+            [
+                "/",
+                "/route1(autoPop: false)",
+                "/route1(autoPop: false)/route2",
+                "/route1(autoPop: false)",
+                "/",
+                "/route3",
+                "/route3/route4",
+            ])
+
+        // check that navigation still works
+
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Route 3"].waitForExistence(timeout: 5))
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+        app.buttons["Push 1"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        assertHistory(
+            app,
+            [
+                "/",
+                "/route1(autoPop: false)",
+                "/route1(autoPop: false)/route2",
+                "/route1(autoPop: false)",
+                "/",
+                "/route3",
+                "/route3/route4",
+                "/route3",
+                "/",
+                "/route1(autoPop: false)",
+                "/",
+            ])
+    }
+
+    func testSheetReplaceRoutesNoChange() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        app.buttons["Sheet"].tap()
+        XCTAssertTrue(app.buttons["Dismiss"].waitForExistence(timeout: 5))
+
+        app.buttons["Push 1"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+
+        app.buttons["Push 2"].tap()
+        XCTAssertTrue(app.staticTexts["Route 2"].waitForExistence(timeout: 5))
+
+        app.buttons["Replace 1, 2"].tap()
+        sleep(2)
+        XCTAssertTrue(app.staticTexts["Route 2"].waitForExistence(timeout: 5))
+
+        assertHistory(
+            app,
+            [
+                "/",
+                "/route1(autoPop: false)",
+                "/route1(autoPop: false)/route2",
+            ])
+
+        // check that navigation still works
+
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+        app.buttons["Push 1"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        assertHistory(
+            app,
+            [
+                "/",
+                "/route1(autoPop: false)",
+                "/route1(autoPop: false)/route2",
+                "/route1(autoPop: false)",
+                "/",
+                "/route1(autoPop: false)",
+                "/",
+            ])
+    }
+
+    func testSheetReplaceRoutesChangeLast() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        app.buttons["Sheet"].tap()
+        XCTAssertTrue(app.buttons["Dismiss"].waitForExistence(timeout: 5))
+
+        app.buttons["Push 1"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+
+        app.buttons["Push 2"].tap()
+        XCTAssertTrue(app.staticTexts["Route 2"].waitForExistence(timeout: 5))
+
+        app.buttons["Replace 1, 3"].tap()
+        XCTAssertTrue(app.staticTexts["Route 3"].waitForExistence(timeout: 5))
+
+        assertHistory(
+            app,
+            [
+                "/",
+                "/route1(autoPop: false)",
+                "/route1(autoPop: false)/route2",
+                "/route1(autoPop: false)",
+                "/route1(autoPop: false)/route3",
+            ])
+
+        // check that navigation still works
+
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+        app.buttons["Push 1"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        assertHistory(
+            app,
+            [
+                "/",
+                "/route1(autoPop: false)",
+                "/route1(autoPop: false)/route2",
+                "/route1(autoPop: false)",
+                "/route1(autoPop: false)/route3",
+                "/route1(autoPop: false)",
+                "/",
+                "/route1(autoPop: false)",
+                "/",
+            ])
+    }
+
+    func testSheetPushMultiWaitForDidShow() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        app.buttons["Sheet push 1 push 2"].tap()
+        XCTAssertTrue(app.buttons["Dismiss"].waitForExistence(timeout: 5))
+
+        XCTAssertTrue(app.staticTexts["Route 2"].waitForExistence(timeout: 5))
+
+        assertHistory(
+            app,
+            [
+                "/",
+                "/route1(autoPop: false)",
+                "/route1(autoPop: false)/route2",
+            ])
+
+        // check that navigation still works
+
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+        app.buttons["Push 1"].tap()
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        assertHistory(
+            app,
+            [
+                "/",
+                "/route1(autoPop: false)",
+                "/route1(autoPop: false)/route2",
+                "/route1(autoPop: false)",
+                "/",
+                "/route1(autoPop: false)",
+                "/",
+            ])
+    }
+
     private func assertHistory(
         _ app: XCUIApplication, _ entries: [String], file: StaticString = #file, line: UInt = #line
     ) {

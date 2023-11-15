@@ -29,16 +29,43 @@ struct Container {
     init() {
         navController = ExampleNavController(rootRoute: .root)
         history = History(navController: navController)
-
-        if CommandLine.arguments.contains("push1push2") {
-            navController.push(.route1(autoPop: false))
-            navController.push(.route2)
-        }
     }
 }
 
 struct ContentView: View {
     @State var container = Container()
+
+    var body: some View {
+        ExampleNavigation(container: container, onDismiss: nil)
+            .task {
+                if CommandLine.arguments.contains("push1push2") {
+                    container.navController.push(.route1(autoPop: false))
+                    container.navController.push(.route2)
+                }
+            }
+    }
+}
+
+struct SheetView: View {
+    @State var container = Container()
+
+    let push1Push2: Bool
+    let onDismiss: () -> Void
+
+    var body: some View {
+        ExampleNavigation(container: container, onDismiss: onDismiss)
+            .task {
+                if push1Push2 {
+                    container.navController.push(.route1(autoPop: false))
+                    container.navController.push(.route2)
+                }
+            }
+    }
+}
+
+struct ExampleNavigation: View {
+    let container: Container
+    let onDismiss: (() -> Void)?
 
     var body: some View {
         Navigation(navController: container.navController) { _, routeContainer in
@@ -56,6 +83,18 @@ struct ContentView: View {
                     Route4View()
                 }
             }
+            .toolbar {
+                if onDismiss != nil {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button(
+                            action: onDismiss!,
+                            label: {
+                                Text("Dismiss").bold()
+                            }
+                        )
+                    }
+                }
+            }
         }
         .environmentObject(container.navController)
         .environmentObject(container.history)
@@ -65,23 +104,56 @@ struct ContentView: View {
 struct RootView: View {
     @EnvironmentObject var navController: ExampleNavController
 
+    @State private var isSheetPresented = false
+    @State private var isSheetPush1Push2Presented = false
+
     var body: some View {
-        VStack {
-            Text("Root").padding()
+        ZStack {
+            if !isSheetPresented && !isSheetPush1Push2Presented {
+                VStack {
+                    Text("Root").padding()
 
-            Button("Push 1") {
-                navController.push(.route1(autoPop: false))
-            }.padding()
+                    Button("Push 1") {
+                        navController.push(.route1(autoPop: false))
+                    }.padding()
 
-            Button("Push 1 (auto pop)") {
-                navController.push(.route1(autoPop: true))
-            }.padding()
+                    Button("Push 1 (auto pop)") {
+                        navController.push(.route1(autoPop: true))
+                    }.padding()
 
-            Button("Replace 3, 4") {
-                navController.replace([.route3, .route4])
-            }.padding()
+                    Button("Replace 3, 4") {
+                        navController.replace([.route3, .route4])
+                    }.padding()
 
-            HistoryView()
+                    Button("Sheet") {
+                        isSheetPresented.toggle()
+                    }.padding()
+
+                    Button("Sheet push 1 push 2") {
+                        isSheetPush1Push2Presented.toggle()
+                    }.padding()
+
+                    HistoryView()
+                }
+            }
+
+            Color.clear
+                .sheet(isPresented: $isSheetPresented) {
+                    SheetView(
+                        push1Push2: false,
+                        onDismiss: {
+                            isSheetPresented = false
+                        })
+                }
+
+            Color.clear
+                .sheet(isPresented: $isSheetPush1Push2Presented) {
+                    SheetView(
+                        push1Push2: true,
+                        onDismiss: {
+                            isSheetPush1Push2Presented = false
+                        })
+                }
         }
     }
 }
