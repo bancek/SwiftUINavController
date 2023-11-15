@@ -1,0 +1,4 @@
+module NavigationControllerDelegateProxy {
+    header "UINavigationControllerDelegateProxy.h"
+    export *
+}

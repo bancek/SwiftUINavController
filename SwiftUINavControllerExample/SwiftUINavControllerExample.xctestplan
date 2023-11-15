@@ -1,0 +1,28 @@
+{
+  "configurations" : [
+    {
+      "id" : "905CCD0F-0907-43E4-96C9-1424EE3E06C8",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:SwiftUINavControllerExample.xcodeproj",
+      "identifier" : "A1BD131A2B04AF7D00663848",
+      "name" : "SwiftUINavControllerExample"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:SwiftUINavControllerExample.xcodeproj",
+        "identifier" : "A1BD13342B04AF7F00663848",
+        "name" : "SwiftUINavControllerExampleUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
