@@ -29,13 +29,15 @@ struct ContentView: View {
 
     var body: some View {
         Navigation(navController: navController) { _, routeContainer in
-            switch routeContainer.route {
-            case .root:
-                AnyView(RootView())
-            case .route1(let id):
-                AnyView(Route1View(id: id))
-            case .route2:
-                AnyView(Route2View())
+            Group {
+                switch routeContainer.route {
+                case .root:
+                    RootView()
+                case .route1(let id):
+                    Route1View(id: id)
+                case .route2:
+                    Route2View()
+                }
             }
         }
         .environmentObject(container.navController)
