@@ -25,7 +25,7 @@ enum ExampleRoute: Hashable, Equatable {
 typealias ExampleNavController = NavController<ExampleRoute>
 
 struct ContentView: View {
-    @State var navController = ExampleNavControllerExampleNavController(rootRoute: .root)
+    @State var navController = ExampleNavController(rootRoute: .root)
 
     var body: some View {
         Navigation(navController: navController) { _, routeContainer in
