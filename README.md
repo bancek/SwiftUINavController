@@ -8,7 +8,7 @@ It handles some weird cases in which `NavigationStack` breaks. It does not use
 `UINavigationController`'s `delegate` to get access to
 `navigationControllerDidShow`.
 
-The library has been tested on iOS 16.4 and iOS 17.0.
+The library has been tested on iOS 16.4, iOS 17.0, iOS 18.6 and iOS 26.2.
 
 ## Example usage
 
@@ -90,14 +90,14 @@ struct Route2View: View {
 ### Run unit tests
 
 ```sh
-xcodebuild test -scheme SwiftUINavController -destination "platform=iOS Simulator,name=iPhone 15 Pro"
+xcodebuild test -scheme SwiftUINavController -destination "platform=iOS Simulator,name=iPhone 17 Pro"
 ```
 
 ### Run UI tests
 
 ```sh
 cd SwiftUINavControllerExample
-xcodebuild test -scheme SwiftUINavControllerExample -destination "platform=iOS Simulator,name=iPhone 15 Pro"
+xcodebuild test -scheme SwiftUINavControllerExample -destination "platform=iOS Simulator,name=iPhone 17 Pro"
 ```
 
 ### Format code

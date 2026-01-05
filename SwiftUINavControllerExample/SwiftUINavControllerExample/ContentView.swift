@@ -106,6 +106,7 @@ struct RootView: View {
 
     @State private var isSheetPresented = false
     @State private var isSheetPush1Push2Presented = false
+    @State private var isAlertPresented = false
 
     var body: some View {
         ZStack {
@@ -133,6 +134,12 @@ struct RootView: View {
                         isSheetPush1Push2Presented.toggle()
                     }.padding()
 
+                    Button("Alert then Push 1") {
+                        navController.alertDisplayed("alert1")
+                        isAlertPresented = true
+                        navController.push(.route1(autoPop: false))
+                    }.padding()
+
                     HistoryView()
                 }
             }
@@ -154,6 +161,11 @@ struct RootView: View {
                             isSheetPush1Push2Presented = false
                         })
                 }
+        }
+        .alert("Alert", isPresented: $isAlertPresented) {
+            Button("OK", role: .cancel) {
+                navController.alertHidden("alert1")
+            }
         }
     }
 }

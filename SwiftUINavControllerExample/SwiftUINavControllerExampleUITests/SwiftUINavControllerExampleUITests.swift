@@ -622,6 +622,27 @@ final class SwiftUINavControllerExampleUITests: XCTestCase {
             ])
     }
 
+    func testAlertPush() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        app.buttons["Alert then Push 1"].tap()
+
+        XCTAssertTrue(app.alerts["Alert"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["Route 1"].exists)
+
+        app.alerts["Alert"].buttons["OK"].tap()
+
+        XCTAssertTrue(app.staticTexts["Route 1"].waitForExistence(timeout: 5))
+
+        app.buttons["Pop"].tap()
+        XCTAssertTrue(app.staticTexts["Root"].waitForExistence(timeout: 5))
+
+        assertHistory(app, ["/", "/route1(autoPop: false)", "/"])
+    }
+
     private func assertHistory(
         _ app: XCUIApplication, _ entries: [String], file: StaticString = #file, line: UInt = #line
     ) {
