@@ -54,6 +54,20 @@ public class NavController<Route: Equatable & Hashable>: ObservableObject {
         processNavOps()
     }
 
+    public func alertDisplayed(_ alertId: String) {
+        log("alert displayed: \(alertId)")
+
+        state = state.withVisibleAlerts(state.visibleAlerts.union([alertId]))
+    }
+
+    public func alertHidden(_ alertId: String) {
+        log("alert hidden: \(alertId)")
+
+        state = state.withVisibleAlerts(state.visibleAlerts.subtracting([alertId]))
+
+        processNavOps()
+    }
+
     public func ensureViewModel<T>(routeContainer: RouteContainer<Route>, create: () -> T) -> T {
         if viewModels[routeContainer.id] == nil {
             // route does not exist anymore, do not cache the view model
@@ -127,7 +141,7 @@ public class NavController<Route: Equatable & Hashable>: ObservableObject {
     }
 
     private func processNavOps() {
-        while !state.navOpQueue.isEmpty && state.navWait.isEmpty {
+        while !state.navOpQueue.isEmpty && state.navWait.isEmpty && state.visibleAlerts.isEmpty {
             var navOpQueue = state.navOpQueue
 
             let navOp = navOpQueue.removeFirst()
@@ -317,6 +331,7 @@ public class NavController<Route: Equatable & Hashable>: ObservableObject {
         public let routesState: [Int: RouteState]
         public let navOpQueue: [NavOp]
         public let navWait: [NavWait]
+        public let visibleAlerts: Set<String>
 
         public var activeRouteContainer: RouteContainer<Route> {
             path.last ?? rootRouteContainer
@@ -337,7 +352,8 @@ public class NavController<Route: Equatable & Hashable>: ObservableObject {
             nextId: Int,
             routesState: [Int: RouteState],
             navOpQueue: [NavOp],
-            navWait: [NavWait]
+            navWait: [NavWait],
+            visibleAlerts: Set<String>
         ) {
             self.path = path
             self.rootRouteContainer = rootRouteContainer
@@ -345,6 +361,7 @@ public class NavController<Route: Equatable & Hashable>: ObservableObject {
             self.routesState = routesState
             self.navOpQueue = navOpQueue
             self.navWait = navWait
+            self.visibleAlerts = visibleAlerts
         }
 
         public init(rootRoute: Route) {
@@ -365,13 +382,16 @@ public class NavController<Route: Equatable & Hashable>: ObservableObject {
 
             NavWait.forRoot(&navWait)
 
+            let visibleAlerts = Set<String>()
+
             self.init(
                 path: path,
                 rootRouteContainer: rootRouteContainer,
                 nextId: nextId,
                 routesState: routesState,
                 navOpQueue: navOpQueue,
-                navWait: navWait
+                navWait: navWait,
+                visibleAlerts: visibleAlerts
             )
         }
 
@@ -382,7 +402,8 @@ public class NavController<Route: Equatable & Hashable>: ObservableObject {
                 nextId: nextId,
                 routesState: routesState,
                 navOpQueue: navOpQueue,
-                navWait: navWait
+                navWait: navWait,
+                visibleAlerts: visibleAlerts
             )
         }
 
@@ -393,7 +414,8 @@ public class NavController<Route: Equatable & Hashable>: ObservableObject {
                 nextId: nextId,
                 routesState: routesState,
                 navOpQueue: navOpQueue,
-                navWait: navWait
+                navWait: navWait,
+                visibleAlerts: visibleAlerts
             )
         }
 
@@ -404,7 +426,8 @@ public class NavController<Route: Equatable & Hashable>: ObservableObject {
                 nextId: nextId,
                 routesState: routesState,
                 navOpQueue: navOpQueue,
-                navWait: navWait
+                navWait: navWait,
+                visibleAlerts: visibleAlerts
             )
         }
 
@@ -437,7 +460,8 @@ public class NavController<Route: Equatable & Hashable>: ObservableObject {
                 nextId: nextId,
                 routesState: routesState,
                 navOpQueue: navOpQueue,
-                navWait: navWait
+                navWait: navWait,
+                visibleAlerts: visibleAlerts
             )
         }
 
@@ -454,7 +478,8 @@ public class NavController<Route: Equatable & Hashable>: ObservableObject {
                 nextId: nextId,
                 routesState: routesState,
                 navOpQueue: navOpQueue,
-                navWait: navWait
+                navWait: navWait,
+                visibleAlerts: visibleAlerts
             )
         }
 
@@ -462,6 +487,18 @@ public class NavController<Route: Equatable & Hashable>: ObservableObject {
             var navWait = self.navWait
             change(&navWait)
             return withNavWait(navWait)
+        }
+
+        public func withVisibleAlerts(_ visibleAlerts: Set<String>) -> State {
+            return State(
+                path: path,
+                rootRouteContainer: rootRouteContainer,
+                nextId: nextId,
+                routesState: routesState,
+                navOpQueue: navOpQueue,
+                navWait: navWait,
+                visibleAlerts: visibleAlerts
+            )
         }
     }
 }

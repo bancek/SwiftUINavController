@@ -418,6 +418,39 @@ final class NavControllerTests: XCTestCase {
         XCTAssertEqual(navController.state, expectedState)
     }
 
+    func testAlertWait() {
+        var (navController, expectedState) = getInitial()
+
+        navController.alertDisplayed("alert1")
+        expectedState = expectedState.withVisibleAlerts(["alert1"])
+        XCTAssertEqual(navController.path, navController.state.path)
+        XCTAssertEqual(navController.state, expectedState)
+
+        navController.push(.route1)
+        expectedState = expectedState.withNavOpQueue([.push(route: .route1)])
+        XCTAssertEqual(navController.path, navController.state.path)
+        XCTAssertEqual(navController.state, expectedState)
+
+        navController.alertHidden("alert1")
+        expectedState =
+            expectedState
+            .withVisibleAlerts([])
+            .withNavOpQueue([])
+            .withPath([RouteContainer(id: 1, route: .route1)])
+            .withNextId(2)
+            .withNavWait([.appear(id: 1), .disappear(id: 0)])
+            .withRouteStateChange {
+                $0[1] = NavController.RouteState(
+                    id: 1,
+                    route: .route1,
+                    inPath: true,
+                    visible: false
+                )
+            }
+        XCTAssertEqual(navController.path, navController.state.path)
+        XCTAssertEqual(navController.state, expectedState)
+    }
+
     func testEnsureViewModel() {
         let (navController, _) = getInitial()
 

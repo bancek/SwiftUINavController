@@ -24,8 +24,8 @@ struct NavigationStackInfo: UIViewControllerRepresentable {
                 for child in children {
                     if let navigationController = child as? UINavigationController {
                         if navigationController.delegate != nil {
-                            if let _ = navigationController.delegate!
-                                as? UINavigationControllerDelegateProxy
+                            if navigationController.delegate!
+                                as? UINavigationControllerDelegateProxy != nil
                             {
                                 // already patched
                             } else {
